@@ -18,4 +18,13 @@ class UsuarioController extends Controller
             ]
         ], 200);
     }
+    public function list_all()
+    {
+        try {
+            $usuario = Usuario::with('departamento')->get();
+            return response()->json(['response' => ['status' => true, 'data' => $usuario, 'message' => 'Lista usuarios']], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json(['response' => ['type_error' => 'query_exception', 'status' => false, 'data' => $e, 'message' => 'Error processing']], 500);
+        }
+    }
 }

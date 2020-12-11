@@ -1,0 +1,131 @@
+[33mcommit 3a5e5c457650ea90179850295c17928757442294[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mmaster[m[33m)[m
+Author: juvenalSalas <juvenal519@gmail.com>
+Date:   Sat Dec 5 21:18:57 2020 -0300
+
+    Enviar+Recibir+Terminar
+
+ .editorconfig                                      |   15 [32m+[m
+ .env.example                                       |   47 [32m+[m
+ .gitattributes                                     |    5 [32m+[m
+ .gitignore                                         |   12 [32m+[m
+ .styleci.yml                                       |   13 [32m+[m
+ README.md                                          |   61 [32m+[m
+ app/Console/Kernel.php                             |   41 [32m+[m
+ app/Exceptions/Handler.php                         |   40 [32m+[m
+ app/Http/Controllers/ArchivoController.php         |   10 [32m+[m
+ app/Http/Controllers/AuthController.php            |  151 [32m+[m
+ app/Http/Controllers/BarcodeController.php         |   17 [32m+[m
+ app/Http/Controllers/Controller.php                |   13 [32m+[m
+ app/Http/Controllers/DepartamentoController.php    |   21 [32m+[m
+ app/Http/Controllers/DocumentoController.php       |  145 [32m+[m
+ app/Http/Controllers/EstadoController.php          |  105 [32m+[m
+ app/Http/Controllers/FileUploadController.php      |   47 [32m+[m
+ app/Http/Controllers/PdfController.php             |   35 [32m+[m
+ app/Http/Controllers/TipoDocumentoController.php   |   21 [32m+[m
+ app/Http/Controllers/UsuarioController.php         |   21 [32m+[m
+ app/Http/Kernel.php                                |   68 [32m+[m
+ app/Http/Middleware/Authenticate.php               |   21 [32m+[m
+ app/Http/Middleware/EncryptCookies.php             |   17 [32m+[m
+ app/Http/Middleware/JwtMiddleware.php              |   36 [32m+[m
+ .../PreventRequestsDuringMaintenance.php           |   17 [32m+[m
+ app/Http/Middleware/RedirectIfAuthenticated.php    |   32 [32m+[m
+ app/Http/Middleware/TrimStrings.php                |   18 [32m+[m
+ app/Http/Middleware/TrustHosts.php                 |   20 [32m+[m
+ app/Http/Middleware/TrustProxies.php               |   23 [32m+[m
+ app/Http/Middleware/VerifyCsrfToken.php            |   17 [32m+[m
+ app/Models/Archivo.php                             |   34 [32m+[m
+ app/Models/Departamento.php                        |   41 [32m+[m
+ app/Models/Documento.php                           |   44 [32m+[m
+ app/Models/Estado.php                              |   50 [32m+[m
+ app/Models/TipoDocumento.php                       |   34 [32m+[m
+ app/Models/Usuario.php                             |   88 [32m+[m
+ app/Providers/AppServiceProvider.php               |   28 [32m+[m
+ app/Providers/AuthServiceProvider.php              |   30 [32m+[m
+ app/Providers/BroadcastServiceProvider.php         |   21 [32m+[m
+ app/Providers/EventServiceProvider.php             |   32 [32m+[m
+ app/Providers/RouteServiceProvider.php             |   63 [32m+[m
+ artisan                                            |   53 [32m+[m
+ bootstrap/app.php                                  |   55 [32m+[m
+ bootstrap/cache/.gitignore                         |    2 [32m+[m
+ composer.json                                      |   66 [32m+[m
+ composer.lock                                      | 9046 [32m++++++++++++++++++++[m
+ config/app.php                                     |  242 [32m+[m
+ config/auth.php                                    |  117 [32m+[m
+ config/broadcasting.php                            |   64 [32m+[m
+ config/cache.php                                   |  104 [32m+[m
+ config/cors.php                                    |   34 [32m+[m
+ config/database.php                                |  147 [32m+[m
+ config/filesystems.php                             |   96 [32m+[m
+ config/hashing.php                                 |   52 [32m+[m
+ config/jwt.php                                     |  304 [32m+[m
+ config/logging.php                                 |  104 [32m+[m
+ config/mail.php                                    |  110 [32m+[m
+ config/queue.php                                   |   89 [32m+[m
+ config/services.php                                |   33 [32m+[m
+ config/session.php                                 |  201 [32m+[m
+ config/view.php                                    |   36 [32m+[m
+ database/.gitignore                                |    2 [32m+[m
+ database/factories/ArchivoFactory.php              |   28 [32m+[m
+ database/factories/DepartamentoFactory.php         |   35 [32m+[m
+ database/factories/DocumentoFactory.php            |   35 [32m+[m
+ database/factories/EstadoFactory.php               |   28 [32m+[m
+ database/factories/TipoDocumentoFactory.php        |   34 [32m+[m
+ database/factories/UserFactory.php                 |   33 [32m+[m
+ database/factories/UsuarioFactory.php              |   46 [32m+[m
+ ...000_00_01_000001_create_departamentos_table.php |   36 [32m+[m
+ ...0_00_01_000002_create_tipo_documentos_table.php |   34 [32m+[m
+ .../2014_10_12_000001_create_usuarios_table.php    |   47 [32m+[m
+ ...4_10_12_100000_create_password_resets_table.php |   32 [32m+[m
+ .../2019_08_19_000000_create_failed_jobs_table.php |   36 [32m+[m
+ .../2020_12_01_223008_create_documentos_table.php  |   40 [32m+[m
+ .../2020_12_01_223021_create_archivos_table.php    |   38 [32m+[m
+ .../2020_12_01_223033_create_estados_table.php     |   42 [32m+[m
+ database/seeders/ArchivoSeeder.php                 |   18 [32m+[m
+ database/seeders/DatabaseSeeder.php                |   23 [32m+[m
+ database/seeders/DepartamentoSeeder.php            |   58 [32m+[m
+ database/seeders/DocumentoSeeder.php               |   20 [32m+[m
+ database/seeders/EstadoSeeder.php                  |   18 [32m+[m
+ database/seeders/TipoDocumentoSeeder.php           |   47 [32m+[m
+ database/seeders/UsuarioSeeder.php                 |   37 [32m+[m
+ package.json                                       |   19 [32m+[m
+ phpunit.xml                                        |   31 [32m+[m
+ public/.htaccess                                   |   21 [32m+[m
+ public/EscudoPencahue150.png                       |  Bin [31m0[m -> [32m30324[m bytes
+ public/LogoPencahue150.png                         |  Bin [31m0[m -> [32m29043[m bytes
+ public/LogoRepoEstado.png                          |  Bin [31m0[m -> [32m20559[m bytes
+ public/documents/.gitignore                        |    2 [32m+[m
+ public/favicon.ico                                 |    0
+ public/folio/.gitignore                            |    3 [32m+[m
+ public/index.php                                   |   55 [32m+[m
+ public/robots.txt                                  |    2 [32m+[m
+ public/web.config                                  |   28 [32m+[m
+ resources/css/app.css                              |    0
+ resources/js/app.js                                |    1 [32m+[m
+ resources/js/bootstrap.js                          |   28 [32m+[m
+ resources/lang/en/auth.php                         |   20 [32m+[m
+ resources/lang/en/pagination.php                   |   19 [32m+[m
+ resources/lang/en/passwords.php                    |   22 [32m+[m
+ resources/lang/en/validation.php                   |  152 [32m+[m
+ resources/views/barcode.blade.php                  |   30 [32m+[m
+ resources/views/folio.blade.php                    |  211 [32m+[m
+ resources/views/welcome.blade.php                  |  132 [32m+[m
+ routes/api.php                                     |   82 [32m+[m
+ routes/channels.php                                |   18 [32m+[m
+ routes/console.php                                 |   19 [32m+[m
+ routes/web.php                                     |   31 [32m+[m
+ server.php                                         |   21 [32m+[m
+ storage/app/.gitignore                             |    3 [32m+[m
+ storage/app/public/.gitignore                      |    2 [32m+[m
+ storage/framework/.gitignore                       |    9 [32m+[m
+ storage/framework/cache/.gitignore                 |    3 [32m+[m
+ storage/framework/cache/data/.gitignore            |    2 [32m+[m
+ storage/framework/sessions/.gitignore              |    2 [32m+[m
+ storage/framework/testing/.gitignore               |    2 [32m+[m
+ storage/framework/views/.gitignore                 |    2 [32m+[m
+ storage/logs/.gitignore                            |    2 [32m+[m
+ tests/CreatesApplication.php                       |   22 [32m+[m
+ tests/Feature/ExampleTest.php                      |   21 [32m+[m
+ tests/TestCase.php                                 |   10 [32m+[m
+ tests/Unit/ExampleTest.php                         |   18 [32m+[m
+ webpack.mix.js                                     |   17 [32m+[m
+ 124 files changed, 14338 insertions(+)

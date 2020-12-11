@@ -15,13 +15,13 @@ class CreateEstadosTable extends Migration
     {
         Schema::create('estados', function (Blueprint $table) {
             $table->id();
-            $table->string('estado_nombre', 100);         
-            $table->text('estado_descripcion', 10)->nullable();  
-            $table->dateTime('estado_fecha_ingreso', 0)->nullable();  
-            $table->datetime('estado_fecha_egreso', 0)->nullable();   
-            $table->unsignedBigInteger('usuario_id')->nullable();    
-            $table->unsignedBigInteger('departamento_id')->nullable();    
-            $table->unsignedBigInteger('documento_id')->nullable();    
+            $table->string('estado_nombre', 100);
+            $table->text('estado_descripcion', 10)->nullable();
+            $table->dateTime('estado_fecha_ingreso', 0)->nullable();
+            $table->dateTime('estado_fecha_egreso', 0)->nullable();
+            $table->unsignedBigInteger('usuario_id')->nullable();
+            $table->unsignedBigInteger('departamento_id')->nullable();
+            $table->unsignedBigInteger('documento_id')->nullable();
             $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('set null');
             $table->foreign('departamento_id')->references('id')->on('departamentos')->onDelete('set null');
             $table->foreign('documento_id')->references('id')->on('documentos')->onDelete('set null');

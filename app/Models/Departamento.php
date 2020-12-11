@@ -16,14 +16,14 @@ class Departamento extends Model
     protected $primaryKey = 'id';
 
     //CAMPOS QUE NO QUEREMOS QUE SE DEVUELVAN EN LAS CONSULTAS
-    protected $hidden = ['created_at','updated_at','deleted_at']; 
+    protected $hidden = ['created_at','updated_at','deleted_at'];
 
     //ATRIBUTOS DE LA TABLE
     protected $fillable = [
-        'depto_nombre',        
-        'depto_descripcion',        
-        'depto_telefono',        
-        'depto_anexo', 
+        'depto_nombre',
+        'depto_descripcion',
+        'depto_telefono',
+        'depto_anexo',
     ];
 
         //RELACIÓN INVERSA HACIA USUARIO
@@ -35,6 +35,11 @@ class Departamento extends Model
        public function estados()
         {
             return $this->hasMany('App\Models\Estado');
+        }
+        //RELACIÓN INVERSA HACIA ESTADO
+       public function documentos()
+        {
+            return $this->hasMany('App\Models\Documentos');
         }
 
 

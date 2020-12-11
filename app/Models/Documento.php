@@ -16,17 +16,19 @@ class Documento extends Model
     protected $primaryKey = 'id';
 
     //CAMPOS QUE NO QUEREMOS QUE SE DEVUELVAN EN LAS CONSULTAS
-    protected $hidden = ['updated_at','deleted_at']; 
+    protected $hidden = ['updated_at','deleted_at'];
 
     //ATRIBUTOS DE LA TABLE
     protected $fillable = [
-        'docu_codigo',        
-        'docu_nombre',        
-        'docu_estado',        
-        'docu_descripcion',        
-        'usuario_id',        
-        'tipo_documento_id', 
-        'created_at'
+        'docu_codigo',
+        'docu_nombre',
+        'docu_estado',
+        'docu_descripcion',
+        'usuario_id',
+        'tipo_documento_id',
+        'departamento_id',
+        'created_at',
+        'docu_fecha_egreso'
     ];
 
         //RELACIÓN DIRECTA HACIA USUARIO
@@ -38,6 +40,11 @@ class Documento extends Model
        public function tipo_documento()
         {
             return $this->belongsTo('App\Models\TipoDocumento');
+        }
+        //RELACIÓN DIRECTA HACIA DEPARTAMENTOS
+       public function departamento()
+        {
+            return $this->belongsTo('App\Models\Departamento');
         }
 
 

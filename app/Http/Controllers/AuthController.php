@@ -47,7 +47,7 @@ class AuthController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request) {
-        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100|unique:users',
@@ -77,7 +77,6 @@ class AuthController extends Controller {
      */
     public function logout() {
         Auth::logout();
-
         return response()->json(['message' => 'User successfully signed out']);
     }
 

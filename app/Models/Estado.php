@@ -16,18 +16,18 @@ class Estado extends Model
     protected $primaryKey = 'id';
 
     //CAMPOS QUE NO QUEREMOS QUE SE DEVUELVAN EN LAS CONSULTAS
-    protected $hidden = ['created_at','updated_at','deleted_at']; 
+    protected $hidden = ['created_at','updated_at','deleted_at'];
 
     //ATRIBUTOS DE LA TABLE
     protected $fillable = [
-        'estado_nombre',   
-        'estado_descripcion',   
-        'estado_fecha_ingreso',   
-        'estado_fecha_egreso',   
-        'usuario_id',   
-        'departamento_id',   
-        'documento_id',   
-      
+        'estado_nombre',
+        'estado_descripcion',
+        'estado_fecha_ingreso',
+        'estado_fecha_egreso',
+        'usuario_id',
+        'departamento_id',
+        'documento_id',
+
     ];
 
         //RELACIÓN DIRECTA HACIA USUARIO
@@ -35,11 +35,11 @@ class Estado extends Model
         {
             return $this->belongsTo('App\Models\Usuario');
         }
-        
+
         //RELACIÓN DIRECTA HACIA DEPARTAMENTO
        public function departamento()
         {
-            return $this->belongsTo('App\Models\Departammento');
+            return $this->belongsTo('App\Models\Departamento');
         }
         //RELACIÓN DIRECTA HACIA DOCUMENTO
        public function documento()
