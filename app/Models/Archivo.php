@@ -23,6 +23,7 @@ class Archivo extends Model
         'archivo_nombre',
         'archivo_extension',
         'archivo_url',
+        'archivo_descripcion',
         'documento_id',
 
     ];

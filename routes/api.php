@@ -25,8 +25,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
 Route::post('logout', [AuthController::class, 'logout']);
+Route::post('register', [AuthController::class, 'register']);
+Route::post('refresh', [AuthController::class, 'refresh']);
 Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
 Route::get('/folio', [BarcodeController::class, 'folio'])->name('folio.index');
 Route::get('/generar-pdf', [PdfController::class, 'generarPdf']);
@@ -51,6 +52,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     // ARCHIVOS
     Route::get('/archivo/list', [ArchivoController::class, 'list']);
     Route::get('/archivo/list_all', [ArchivoController::class, 'list_all']);
+    Route::get('/archivo/ver_archivo/{documento_id}', [ArchivoController::class, 'verArchivo']);
+    Route::get('/archivo/ver_folio/{documento_id}', [ArchivoController::class, 'verFolio']);
     Route::get('/archivo/details/{id}', [ArchivoController::class, 'details']);
     Route::post('/archivo/store', [ArchivoController::class, 'add']);
     Route::put('/archivo/update/{id}', [ArchivoController::class, 'edit']);

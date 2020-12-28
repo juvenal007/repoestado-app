@@ -63,7 +63,7 @@ class DocumentoController extends Controller
                 'archivo_nombre' => $subirArchivo['nombre_archivo'],
                 'archivo_extension' => $subirArchivo['extension'],
                 'archivo_url' => $subirArchivo['file'],
-                'archivo_descripcion' => $subirArchivo['descripcion_documento'],
+                'archivo_descripcion' => 'DOCUMENTO',
                 'documento_id' => $documento->id,
             ];
 
@@ -136,44 +136,63 @@ class DocumentoController extends Controller
         }
     }
 
-    public function list_departamento($id_departamento)
+    public function calcularTiempo($documentos_unicos)
     {
         try {
             $fecha = Carbon::parse(Carbon::now()->format('Y-m-d H:i:s'));
 
-            $arr = [];
 
-            $documentos = Documento::with('departamento', 'usuario')->where('departamento_id', $id_departamento)->orderBy('id', 'DESC')->get();
-
-            foreach ($documentos as $clave => $valor) {
+            foreach ($documentos_unicos as $clave => $valor) {
 
                 $fechaNueva = Carbon::parse($valor->created_at)->format('Y-m-d H:i:s');
 
                 if (!$valor->docu_fecha_egreso == null) {
-                    $docu_fecha_egreso = Carbon::parse($valor->docu_fecha_egreso)->format('d-m-Y H:i:s');
-                    $documentos[$clave]->docu_fecha_egreso = $docu_fecha_egreso;
+
+                    $fechaIngreso = Carbon::parse($valor->created_at)->format('Y-m-d H:i:s');
+                    $fechaIngreso = Carbon::create($fechaIngreso);
+
+                    $fechaEgreso = Carbon::parse($valor->docu_fecha_egreso)->format('Y-m-d H:i:s');
+                    $fechaEgreso = Carbon::create($fechaEgreso);
+
+                    $diferenciaMeses = $fechaEgreso->diffInMonths($fechaIngreso, true);
+                    $diferenciaDias = $fechaEgreso->diffInDays($fechaIngreso->addMonth($diferenciaMeses), true);
+                    $diferenciaHoras = $fechaEgreso->diffInHours($fechaIngreso->addDays($diferenciaDias), true);
+                    $diferenciaMinutos = $fechaEgreso->diffInMinutes($fechaIngreso->addHours($diferenciaHoras), true);
+
+                    $documentos_unicos[$clave]->diferenciaMeses = $diferenciaMeses;
+                    $documentos_unicos[$clave]->diferenciaDias = $diferenciaDias;
+                    $documentos_unicos[$clave]->diferenciaHoras = $diferenciaHoras;
+                    $documentos_unicos[$clave]->diferenciaMinutos = $diferenciaMinutos;
+
+                    $documentos_unicos[$clave]->docu_fecha_ingreso = Carbon::parse($valor->created_at)->format('d-m-Y H:i:s');
+                } else {
+                    $fechaCarbon = Carbon::create($fechaNueva);
+
+                    // CALCULO LA DIFERENCIA DE DIAS
+                    $diferenciaMeses = $fecha->diffInMonths($fechaCarbon, true);
+                    $diferenciaDias = $fecha->diffInDays($fechaCarbon->addMonth($diferenciaMeses), true);
+                    $diferenciaHoras = $fecha->diffInHours($fechaCarbon->addDays($diferenciaDias), true);
+                    $diferenciaMinutos = $fecha->diffInMinutes($fechaCarbon->addHours($diferenciaHoras), true);
+                    $documentos_unicos[$clave]->diferenciaMeses = $diferenciaMeses;
+                    $documentos_unicos[$clave]->diferenciaDias = $diferenciaDias;
+                    $documentos_unicos[$clave]->diferenciaHoras = $diferenciaHoras;
+                    $documentos_unicos[$clave]->diferenciaMinutos = $diferenciaMinutos;
+                    $documentos_unicos[$clave]->docu_fecha_ingreso = Carbon::parse($valor->created_at)->format('d-m-Y H:i:s');
                 }
-
-                $fechaCarbon = Carbon::create($fechaNueva);
-
-
-                // CALCULO LA DIFERENCIA DE DIAS
-                $diferenciaMeses = $fecha->diffInMonths($fechaCarbon, true);
-                $diferenciaDias = $fecha->diffInDays($fechaCarbon->addMonth($diferenciaMeses), true);
-                $diferenciaHoras = $fecha->diffInHours($fechaCarbon->addDays($diferenciaDias), true);
-                $diferenciaMinutos = $fecha->diffInMinutes($fechaCarbon->addHours($diferenciaHoras), true);
-
-                $documentos[$clave]->diferenciaMeses = $diferenciaMeses;
-                $documentos[$clave]->diferenciaDias = $diferenciaDias;
-                $documentos[$clave]->diferenciaHoras = $diferenciaHoras;
-                $documentos[$clave]->diferenciaMinutos = $diferenciaMinutos;
-
-                $documentos[$clave]->docu_fecha_ingreso = Carbon::parse($valor->created_at)->format('d-m-Y H:i:s');
-
-
-                array_push($arr, $documentos);
             }
+            return $documentos_unicos;
+        } catch (Exception $e) {
+            return $e;
+        }
+    }
 
+    public function list_departamento($id_departamento)
+    {
+        try {
+
+            $documentos = Documento::with('departamento', 'usuario')->where('departamento_id', $id_departamento)->orderBy('id', 'DESC')->get();
+
+            $documentos = $this->calcularTiempo($documentos);
 
             return response()->json(['response' => ['status' => true, 'data' => $documentos, 'message' => 'Lista Documentos por departamento']], 200);
         } catch (\Illuminate\Database\QueryException $e) {
@@ -190,8 +209,7 @@ class DocumentoController extends Controller
 
             $documentos_unicos = [];
 
-            foreach($estados as $clave => $valor)
-            {
+            foreach ($estados as $clave => $valor) {
                 $documentos = Documento::with('usuario')->where('id', $valor['documento']->id)->first();
                 array_push($documentos_unicos, $documentos);
             }
@@ -314,41 +332,41 @@ class DocumentoController extends Controller
 
 
 
-                $fechaNueva = Carbon::parse($documentos_unicos->created_at)->format('Y-m-d H:i:s');
+            $fechaNueva = Carbon::parse($documentos_unicos->created_at)->format('Y-m-d H:i:s');
 
-                if (!$documentos_unicos->docu_fecha_egreso == null) {
+            if (!$documentos_unicos->docu_fecha_egreso == null) {
 
-                    $fechaIngreso = Carbon::parse($documentos_unicos->created_at)->format('Y-m-d H:i:s');
-                    $fechaIngreso = Carbon::create($fechaIngreso);
+                $fechaIngreso = Carbon::parse($documentos_unicos->created_at)->format('Y-m-d H:i:s');
+                $fechaIngreso = Carbon::create($fechaIngreso);
 
-                    $fechaEgreso = Carbon::parse($documentos_unicos->docu_fecha_egreso)->format('Y-m-d H:i:s');
-                    $fechaEgreso = Carbon::create($fechaEgreso);
+                $fechaEgreso = Carbon::parse($documentos_unicos->docu_fecha_egreso)->format('Y-m-d H:i:s');
+                $fechaEgreso = Carbon::create($fechaEgreso);
 
-                    $diferenciaMeses = $fechaEgreso->diffInMonths($fechaIngreso, true);
-                    $diferenciaDias = $fechaEgreso->diffInDays($fechaIngreso->addMonth($diferenciaMeses), true);
-                    $diferenciaHoras = $fechaEgreso->diffInHours($fechaIngreso->addDays($diferenciaDias), true);
-                    $diferenciaMinutos = $fechaEgreso->diffInMinutes($fechaIngreso->addHours($diferenciaHoras), true);
+                $diferenciaMeses = $fechaEgreso->diffInMonths($fechaIngreso, true);
+                $diferenciaDias = $fechaEgreso->diffInDays($fechaIngreso->addMonth($diferenciaMeses), true);
+                $diferenciaHoras = $fechaEgreso->diffInHours($fechaIngreso->addDays($diferenciaDias), true);
+                $diferenciaMinutos = $fechaEgreso->diffInMinutes($fechaIngreso->addHours($diferenciaHoras), true);
 
-                    $documentos_unicos->diferenciaMeses = $diferenciaMeses;
-                    $documentos_unicos->diferenciaDias = $diferenciaDias;
-                    $documentos_unicos->diferenciaHoras = $diferenciaHoras;
-                    $documentos_unicos->diferenciaMinutos = $diferenciaMinutos;
+                $documentos_unicos->diferenciaMeses = $diferenciaMeses;
+                $documentos_unicos->diferenciaDias = $diferenciaDias;
+                $documentos_unicos->diferenciaHoras = $diferenciaHoras;
+                $documentos_unicos->diferenciaMinutos = $diferenciaMinutos;
 
-                    $documentos_unicos->docu_fecha_ingreso = Carbon::parse($documentos_unicos->created_at)->format('d-m-Y H:i:s');
-                } else {
-                    $fechaCarbon = Carbon::create($fechaNueva);
+                $documentos_unicos->docu_fecha_ingreso = Carbon::parse($documentos_unicos->created_at)->format('d-m-Y H:i:s');
+            } else {
+                $fechaCarbon = Carbon::create($fechaNueva);
 
-                    // CALCULO LA DIFERENCIA DE DIAS
-                    $diferenciaMeses = $fecha->diffInMonths($fechaCarbon, true);
-                    $diferenciaDias = $fecha->diffInDays($fechaCarbon->addMonth($diferenciaMeses), true);
-                    $diferenciaHoras = $fecha->diffInHours($fechaCarbon->addDays($diferenciaDias), true);
-                    $diferenciaMinutos = $fecha->diffInMinutes($fechaCarbon->addHours($diferenciaHoras), true);
-                    $documentos_unicos->diferenciaMeses = $diferenciaMeses;
-                    $documentos_unicos->diferenciaDias = $diferenciaDias;
-                    $documentos_unicos->diferenciaHoras = $diferenciaHoras;
-                    $documentos_unicos->diferenciaMinutos = $diferenciaMinutos;
-                    $documentos_unicos->docu_fecha_ingreso = Carbon::parse($documentos_unicos->created_at)->format('d-m-Y H:i:s');
-                }
+                // CALCULO LA DIFERENCIA DE DIAS
+                $diferenciaMeses = $fecha->diffInMonths($fechaCarbon, true);
+                $diferenciaDias = $fecha->diffInDays($fechaCarbon->addMonth($diferenciaMeses), true);
+                $diferenciaHoras = $fecha->diffInHours($fechaCarbon->addDays($diferenciaDias), true);
+                $diferenciaMinutos = $fecha->diffInMinutes($fechaCarbon->addHours($diferenciaHoras), true);
+                $documentos_unicos->diferenciaMeses = $diferenciaMeses;
+                $documentos_unicos->diferenciaDias = $diferenciaDias;
+                $documentos_unicos->diferenciaHoras = $diferenciaHoras;
+                $documentos_unicos->diferenciaMinutos = $diferenciaMinutos;
+                $documentos_unicos->docu_fecha_ingreso = Carbon::parse($documentos_unicos->created_at)->format('d-m-Y H:i:s');
+            }
 
 
 
