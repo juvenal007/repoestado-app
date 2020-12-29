@@ -88,8 +88,7 @@ class DocumentoController extends Controller
             $estado->save();
 
             // CREAMOS LA TABLA ESTADO EN PROCESO Y ENVIAMOS A LOS DESTINATARIOS SI CORRESPONDE
-
-
+            /* 
             if (sizeof($destinatarios) > 0) {
                 foreach ($destinatarios as $index => $valores) {
                     $datos = [
@@ -104,7 +103,7 @@ class DocumentoController extends Controller
                     $estado = new Estado($datos);
                     $estado->save();
                 }
-            }
+            } */
 
             //SI TODO SALE BIEN, GENERAMOS EL PDF FOLIO
 
@@ -204,15 +203,21 @@ class DocumentoController extends Controller
         try {
 
             $fecha = Carbon::parse(Carbon::now()->format('Y-m-d H:i:s'));
-            $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->select('usuario_id','documento_id')->groupBy('usuario_id', 'documento_id')->orderBy('id', 'DESC')->get()->toArray();
-          /*   $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->distinct('documento_id')->orderBy('id', 'DESC')->get(); */
-          /*   return response()->json(['response' => ['status' => true, 'data' => $estados, 'message' => $estados]], 200); */
+            $estados = Estado::with('usuario', 'documento')
+                ->where('usuario_id', $id_usuario)
+                ->select('usuario_id', 'documento_id')
+                ->groupBy('usuario_id', 'documento_id')
+                ->orderBy('id', 'DESC')
+                ->get();
+            /*   $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->distinct('documento_id')->orderBy('id', 'DESC')->get(); */
+            /*   return response()->json(['response' => ['status' => true, 'data' => $estados, 'message' => $estados]], 200); */
             $documentos_unicos = [];
 
             foreach ($estados as $clave => $valor) {
-                $documentos = Documento::with('usuario')->where('id', $valor['documento']['id'])->first();
-                array_push($documentos_unicos, $documentos);
-
+                if (!$valor['documento'] == null) {
+                    $documentos = Documento::with('usuario')->where('id', $valor['documento']['id'])->first();
+                    array_push($documentos_unicos, $documentos);
+                }
             }
 
             foreach ($documentos_unicos as $clave => $valor) {
@@ -369,6 +374,17 @@ class DocumentoController extends Controller
 
 
             return response()->json(['response' => ['status' => true, 'data' => $documentos_unicos, 'message' => 'user']], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json(['response' => ['type_error' => 'query_exception', 'status' => false, 'data' => $e, 'message' => 'Error processing']], 500);
+        }
+    }
+    public function delete($id)
+    {
+        try {
+
+            $documento = Documento::find($id);
+            $documento->delete();
+            return response()->json(['response' => ['status' => true, 'data' => $documento, 'message' => 'user']], 200);
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json(['response' => ['type_error' => 'query_exception', 'status' => false, 'data' => $e, 'message' => 'Error processing']], 500);
         }

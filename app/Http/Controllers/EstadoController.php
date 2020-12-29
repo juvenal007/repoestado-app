@@ -16,6 +16,10 @@ class EstadoController extends Controller
         try {
             // BUSCAMOS LOS DOCUMENTOS QUE TENGAN EL DOCU_CODIGO EN REGLA SOLO TRAERA UN UNICO ELEMENTO
             $documento = Documento::where('docu_codigo', $request->data['docu_codigo'])->first();
+            if(!$documento)
+            {
+                return response()->json(['response' => ['type_error' => 'entity_not_found','status' => false,'data' => [],'message' => 'Documento no encontrado']],400);
+            }
             // VARIABLES GENERALES
             $fecha = date("Y-m-d H:i:s");
             $user = json_decode($request->data['usuario']);
@@ -34,21 +38,13 @@ class EstadoController extends Controller
                 return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El Documento no puede ser Recibido por la misma persona']], 200);
             }
 
-
-
-
-
-
-            // ANUNCIAMOS LA PARTIDA PARA NUESTRO ROLL BACK
-
-
             //MODIFICAMOS EL REGISTRO DE ESTADO FECHA PARA FINALIZAR SU PROCESO
 
             if ($ultimoEstado->estado_nombre == 'ENVIADO') {
                 $ultimoEstado->estado_fecha_egreso = $fecha;
                 $ultimoEstado->save();
             } else if ($ultimoEstado->estado_nombre == 'TERMINADO') {
-                return response()->json(['response' => ['status' => true, 'data' => $ultimoEstado, 'message' => 'El Documento ya ha sido Terminado']], 200);
+                return response()->json(['response' => ['status' => false, 'data' => $ultimoEstado, 'message' => 'El Documento ya ha sido Terminado']], 200);
             } else {
                 $ultimoEstado->estado_nombre = 'ACEPTADO';
                 $ultimoEstado->estado_fecha_egreso = $fecha;
@@ -72,7 +68,6 @@ class EstadoController extends Controller
             $estado->save();
 
 
-
             return response()->json(['response' => ['status' => true, 'data' => $estado, 'message' => 'Documento Recibido']], 201);
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json(['response' => ['type_error' => 'query_exception', 'status' => false, 'data' => $e, 'message' => 'Error processing']], 200);
@@ -84,6 +79,11 @@ class EstadoController extends Controller
         try {
             // BUSCAMOS LOS DOCUMENTOS QUE TENGAN EL DOCU_CODIGO EN REGLA SOLO TRAERA UN UNICO ELEMENTO
             $documento = Documento::where('docu_codigo', $request->data['docu_codigo'])->first();
+            // CONSULTADOS SI EXISTEN DOCUMENTOS
+            if(!$documento)
+            {
+                return response()->json(['response' => ['type_error' => 'entity_not_found','status' => false,'data' => [],'message' => 'Documento no encontrado']],400);
+            }
             // VARIABLES GENERALES
             $fecha = date("Y-m-d H:i:s");
             $user = json_decode($request->data['usuario']);

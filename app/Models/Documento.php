@@ -16,7 +16,9 @@ class Documento extends Model
     protected $primaryKey = 'id';
 
     //CAMPOS QUE NO QUEREMOS QUE SE DEVUELVAN EN LAS CONSULTAS
-    protected $hidden = ['updated_at','deleted_at'];
+    protected $hidden = ['updated_at'];
+
+    protected $dates = ['deleted_at'];
 
     //ATRIBUTOS DE LA TABLE
     protected $fillable = [
