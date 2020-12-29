@@ -204,18 +204,16 @@ class DocumentoController extends Controller
         try {
 
             $fecha = Carbon::parse(Carbon::now()->format('Y-m-d H:i:s'));
-
-            $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->distinct('documento_id')->orderBy('id', 'DESC')->get();
-
+            $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->select('usuario_id','documento_id')->groupBy('usuario_id', 'documento_id')->orderBy('id', 'DESC')->get()->toArray();
+          /*   $estados = Estado::with('usuario', 'documento')->where('usuario_id', $id_usuario)->distinct('documento_id')->orderBy('id', 'DESC')->get(); */
+          /*   return response()->json(['response' => ['status' => true, 'data' => $estados, 'message' => $estados]], 200); */
             $documentos_unicos = [];
 
             foreach ($estados as $clave => $valor) {
-                $documentos = Documento::with('usuario')->where('id', $valor['documento']->id)->first();
+                $documentos = Documento::with('usuario')->where('id', $valor['documento']['id'])->first();
                 array_push($documentos_unicos, $documentos);
+
             }
-
-            /* $documentos = Documento::with('usuario')->where('id', $id_usuario)->orderBy('id', 'DESC')->get(); */
-
 
             foreach ($documentos_unicos as $clave => $valor) {
 

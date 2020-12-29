@@ -16,13 +16,9 @@ class EstadoController extends Controller
         try {
             // BUSCAMOS LOS DOCUMENTOS QUE TENGAN EL DOCU_CODIGO EN REGLA SOLO TRAERA UN UNICO ELEMENTO
             $documento = Documento::where('docu_codigo', $request->data['docu_codigo'])->first();
-
-            if ($documento == null) {
-                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'Codigo Incorrecto']], 201);
-            } else if ($documento->docu_estado == 'TERMINADO') {
-                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'Documento Terminado']], 201);
-            }
-
+            // VARIABLES GENERALES
+            $fecha = date("Y-m-d H:i:s");
+            $user = json_decode($request->data['usuario']);
 
 
             // BUSCAMOS EL ULTIMO ESTADO DEL DOCUMENTO, YA SEA RECIBIDO O ENVIADO
@@ -30,9 +26,18 @@ class EstadoController extends Controller
             // QUE EN REGLA SERÍA EL ÚLTIMO REGISTRO DE ESTADO.
             $ultimoEstado = Estado::where('documento_id', $documento->id)->orderBy('estado_fecha_ingreso', 'DESC')->first();
 
-            // VARIABLES GENERALES
-            $fecha = date("Y-m-d H:i:s");
-            $user = json_decode($request->data['usuario']);
+            if ($documento == null) {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'Codigo Incorrecto']], 200);
+            } else if ($documento->docu_estado == 'TERMINADO') {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El Documento ya ha sido Terminado']], 200);
+            } else if ($ultimoEstado->usuario_id == $user->id) {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El Documento no puede ser Recibido por la misma persona']], 200);
+            }
+
+
+
+
+
 
             // ANUNCIAMOS LA PARTIDA PARA NUESTRO ROLL BACK
 
@@ -43,7 +48,7 @@ class EstadoController extends Controller
                 $ultimoEstado->estado_fecha_egreso = $fecha;
                 $ultimoEstado->save();
             } else if ($ultimoEstado->estado_nombre == 'TERMINADO') {
-                return response()->json(['response' => ['status' => true, 'data' => $ultimoEstado, 'message' => 'Documento terminado']], 200);
+                return response()->json(['response' => ['status' => true, 'data' => $ultimoEstado, 'message' => 'El Documento ya ha sido Terminado']], 200);
             } else {
                 $ultimoEstado->estado_nombre = 'ACEPTADO';
                 $ultimoEstado->estado_fecha_egreso = $fecha;
@@ -79,32 +84,54 @@ class EstadoController extends Controller
         try {
             // BUSCAMOS LOS DOCUMENTOS QUE TENGAN EL DOCU_CODIGO EN REGLA SOLO TRAERA UN UNICO ELEMENTO
             $documento = Documento::where('docu_codigo', $request->data['docu_codigo'])->first();
-            if ($documento == null) {
-                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'Codigo Incorrecto']], 201);
-            } else if ($documento->docu_estado == 'TERMINADO') {
-                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El documento ya ha sido terminado']], 201);
-            }
+            // VARIABLES GENERALES
+            $fecha = date("Y-m-d H:i:s");
+            $user = json_decode($request->data['usuario']);
+
+            // BUSCAMOS LA CANTIDAD DE ESTADOS DE UN DOCUMENTO, PARA VALIDAR QUE SEA MAYOR A 1, YA QUE SI TIENE SOLO 1 ESTADO SIGNIFICA QUE NO PUEDE SER TERMINADO POR EL MISMO USUARIO
+            $cantidad_estados = Estado::where('documento_id', $documento->id)->get()->count();
+
             // BUSCAMOS EL ULTIMO ESTADO DEL DOCUMENTO, YA SEA RECIBIDO O ENVIADO
             // OBTENEMOS TODOS LOS ESTADOS DEL DOCUMENTO, LUEGO ORDENAMOS POR ID DESCENDIENTE Y OBTENEMOS EL PRIMER VALOR
             // QUE EN REGLA SERÍA EL ÚLTIMO REGISTRO DE ESTADO.
             $ultimoEstado = Estado::where('documento_id', $documento->id)->orderBy('estado_fecha_ingreso', 'DESC')->get()->first();
 
-            // VARIABLES GENERALES
-            $fecha = date("Y-m-d H:i:s");
-            $user = json_decode($request->data['usuario']);
+            if ($documento == null) {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'Codigo Incorrecto']], 200);
+            } else if ($documento->docu_estado == 'TERMINADO') {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El Documento ya ha sido terminado']], 200);
+            } else if ($ultimoEstado->usuario_id == $user->id) {
+                return response()->json(['response' => ['status' => false, 'data' => $documento, 'message' => 'El Documento no puede ser Terminado']], 200);
+            }
 
-
-
-            //MODIFICAMOS EL REGISTRO DE ESTADO FECHA PARA FINALIZAR SU PROCESO
+            /*  //MODIFICAMOS EL REGISTRO DE ESTADO FECHA PARA FINALIZAR SU PROCESO
             if ($ultimoEstado->estado_nombre == 'TERMINADO') {
                 return response()->json(['response' => ['status' => true, 'data' => $ultimoEstado, 'message' => 'El documento ya ha sido terminado']], 200);
             } else {
                 $ultimoEstado->estado_nombre = 'TERMINADO';
                 $ultimoEstado->estado_fecha_egreso = $fecha;
                 $ultimoEstado->save();
-            }
+            } */
 
-            // ACTUALIZAMOS EL DOCUMENTO A SU ESTADO TERMINADO
+            // ACTUALIZAMOS LA FECHA DEL ESTADO PARA DAR EL TIEMPO DE DEMORA.
+            $ultimoEstado->estado_nombre = 'ACEPTADO';
+            $ultimoEstado->estado_fecha_egreso = $fecha;
+            $ultimoEstado->save();
+
+            // CREAMOS EL ESTADO TERMINADO
+            $data = [
+                'estado_nombre' => 'TERMINADO',
+                'estado_descripcion' => 'Terminado por ' . $user->usuario_nombre,
+                'estado_fecha_ingreso' => $fecha,
+                'estado_fecha_egreso' => $fecha,
+                'usuario_id' => $user->id,
+                'departamento_id' => $user->departamento_id,
+                'documento_id' => $documento->id
+            ];
+            $estado = new Estado($data);
+            $estado->save();
+
+            // ACTUALIZAMOS EL ESTADO DEL DOCUMENTO A TERMINADO
             $documento->docu_estado = 'TERMINADO';
             $documento->docu_fecha_egreso = $fecha;
             $documento->save();
