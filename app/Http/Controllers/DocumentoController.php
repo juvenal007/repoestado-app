@@ -87,24 +87,6 @@ class DocumentoController extends Controller
             $estado = new Estado($datos);
             $estado->save();
 
-            // CREAMOS LA TABLA ESTADO EN PROCESO Y ENVIAMOS A LOS DESTINATARIOS SI CORRESPONDE
-            /* 
-            if (sizeof($destinatarios) > 0) {
-                foreach ($destinatarios as $index => $valores) {
-                    $datos = [
-                        'estado_nombre' => 'EN PROCESO',
-                        'estado_descripcion' => 'Archivo enviado a ' . $valores->nombre,
-                        'estado_fecha_ingreso' => $fecha,
-                        'estado_fecha_egreso' => null,
-                        'usuario_id' => $valores->id,
-                        'departamento_id' => $valores->departamento_id,
-                        'documento_id' => $documento->id
-                    ];
-                    $estado = new Estado($datos);
-                    $estado->save();
-                }
-            } */
-
             //SI TODO SALE BIEN, GENERAMOS EL PDF FOLIO
 
             $user = Usuario::with('departamento')->where('id', $user->departamento_id)->get();

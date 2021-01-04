@@ -1,11 +1,14 @@
 <?php
 
+use App\Exports\DocumentsExport;
 use App\Http\Controllers\ArchivoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarcodeController;
+use App\Http\Controllers\DashController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\EstadoController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\TipoDocumentoController;
@@ -28,17 +31,25 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('refresh', [AuthController::class, 'refresh']);
+
+// GENERAR CODIGO BARRA
 Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+
+// GENERAR FOLIO PDF
 Route::get('/folio', [BarcodeController::class, 'folio'])->name('folio.index');
+
+// GENERAR ARCHIVO DOCUMENTO
 Route::get('/generar-pdf', [PdfController::class, 'generarPdf']);
 
+//EXPORTS EXCEL
+Route::get('/documento/export', [ExportController::class, 'export']);
+Route::get('/documento/generar-excel', [DocumentsExport::class, 'list_usuario']);
 
 
 Route::group(['middleware' => ['jwt.verify']], function () {
 
     // UPLOAD FILES
     Route::post('/file-upload/upload', [FileUploadController::class, 'do_upload']);
-
 
     // TIPO DOCUMENTOS
     Route::get('/tipo-documento/list', [TipoDocumentoController::class, 'list']);
@@ -99,4 +110,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::put('/estado/update/{id}', [EstadoController::class, 'edit']);
     Route::delete('/estado/delete/{id}', [EstadoController::class, 'delete']);
     Route::get('/estado/pluck', [EstadoController::class, 'pluck']);
+
+    //DASHBOARD
+    Route::get('/dashboard/barra', [DashController::class, 'grafico_barra']);
+    Route::get('/dashboard/circular', [DashController::class, 'grafico_circular']);
 });
