@@ -52,9 +52,9 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://repoestado-app.herokuapp.com/'),
+    'url' => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL', null),
+    'asset_url' => env('ASSET_URL', 'https://repoestado-app.herokuapp.com/'),
 
     /*
     |--------------------------------------------------------------------------
